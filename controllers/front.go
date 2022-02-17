@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+
+	"github.com/sirupsen/logrus"
 )
 
-func RegisterControllers() {
-	uc := newUserController()
+func RegisterControllers(logger logrus.FieldLogger) {
+	uc := newUserController(logger)
 
 	http.Handle("/users", *uc)
 	http.Handle("/users/", *uc)

@@ -7,9 +7,11 @@ import (
 	"strconv"
 
 	"github.com/nicvw/go-webservice/models"
+	"github.com/sirupsen/logrus"
 )
 
 type userController struct {
+	logger        logrus.FieldLogger
 	userIDPattern *regexp.Regexp
 }
 
@@ -116,8 +118,9 @@ func (uc *userController) parseRequest(r *http.Request) (models.User, error) {
 }
 
 // constructor function
-func newUserController() *userController {
+func newUserController(logger logrus.FieldLogger) *userController {
 	return &userController{ // this works because this is a struct data type
 		userIDPattern: regexp.MustCompile(`^/users/(\d+)/?`),
+		logger:        logger,
 	}
 }
