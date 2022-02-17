@@ -16,6 +16,7 @@ type userController struct {
 }
 
 func (uc userController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	logWithFields := uc.logger.WithFields(logrus.Fields{"method": r.Method, "path": r.URL.Path})
 	if r.URL.Path == "/users" {
 		switch r.Method {
 		case http.MethodGet:
@@ -23,16 +24,21 @@ func (uc userController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case http.MethodPost:
 			uc.post(w, r)
 		default:
+			logWithFields.Error("Invalid request")
 			w.WriteHeader(http.StatusNotImplemented)
 		}
 	} else {
 		matches := uc.userIDPattern.FindStringSubmatch(r.URL.Path)
 		if len(matches) == 0 {
+			logWithFields.Error("Invalid request")
 			w.WriteHeader(http.StatusNotFound)
+			return
 		}
 		id, err := strconv.Atoi(matches[1])
 		if err != nil {
+			logWithFields.Error("Malformed user ID")
 			w.WriteHeader(http.StatusNotFound)
+			return
 		}
 		switch r.Method {
 		case http.MethodGet:
@@ -42,6 +48,7 @@ func (uc userController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case http.MethodDelete:
 			uc.delete(id, w)
 		default:
+			logWithFields.Error("Invalid request")
 			w.WriteHeader(http.StatusNotImplemented)
 		}
 	}
